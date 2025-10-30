@@ -73,44 +73,96 @@ def send_message():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🥀🥀𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 𝐏𝐑𝐈𝐍𝐂𝐄 𝐇𝐄𝐑𝐄🥀🥀
+  <title>🥀🥀𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 𝐊𝐀𝐋𝐔𝐖𝐀 𝐇𝐄𝐑𝐄🥀🥀
 </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     /* CSS for styling elements */
-    label { color: white; }
+    label { color: #00ffff; }
     .file { height: 30px; }
     body {
-      background-image: url('https://i.ibb.co/3y6KCjFL/1745140321925.png');
-      background-size: cover;
-      background-repeat: no-repeat;
-      color: white;
+      background-color: #000011;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(transparent 90%, rgba(0, 255, 255, 0.1) 90%);
+      background-size: 100% 4px;
+      animation: matrix 20s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes matrix {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
     }
     .container {
       max-width: 350px;
       height: auto;
-      border-radius: 20px;
+      border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      box-shadow: 0 0 15px white;
-      border: none;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+      border: 1px solid #00ffff;
+      background-color: rgba(0, 10, 20, 0.8);
+      backdrop-filter: blur(5px);
       resize: none;
     }
     .form-control {
-      outline: 1px red;
-      border: 1px double white;
-      background: transparent;
+      outline: none;
+      border: 1px solid #00ffff;
+      background: rgba(0, 20, 40, 0.7);
       width: 100%;
       height: 40px;
       padding: 7px;
       margin-bottom: 20px;
-      border-radius: 10px;
-      color: white;
+      border-radius: 5px;
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+    }
+    .form-control:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      background: rgba(0, 30, 60, 0.7);
     }
     .header { text-align: center; padding-bottom: 20px; }
-    .btn-submit { width: 100%; margin-top: 10px; }
-    .footer { text-align: center; margin-top: 20px; color: #888; }
+    .btn-submit { 
+      width: 100%; 
+      margin-top: 10px; 
+      background: linear-gradient(45deg, #001122, #003366);
+      border: 1px solid #00ffff;
+      color: #00ffff;
+      font-weight: bold;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+    }
+    .btn-submit:hover {
+      background: linear-gradient(45deg, #003366, #001122);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    }
+    .btn-danger {
+      background: linear-gradient(45deg, #330000, #660000);
+      border: 1px solid #ff0000;
+      color: #ff9999;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(45deg, #660000, #330000);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+    }
+    .footer { text-align: center; margin-top: 20px; color: #0088ff; }
     .whatsapp-link {
       display: inline-block;
       color: #25d366;
@@ -118,11 +170,21 @@ def send_message():
       margin-top: 10px;
     }
     .whatsapp-link i { margin-right: 5px; }
+    h1 {
+      color: #00ffff;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+    }
+    select option {
+      background-color: #001122;
+      color: #00ffff;
+    }
   </style>
 </head>
 <body>
   <header class="header mt-4">
-    <h1 class="mt-3">🥀🥀𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 𝐏𝐑𝐈𝐍𝐂𝐄 𝐇𝐄𝐑𝐄🥀🥀
+    <h1 class="mt-3">🥀🥀𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 𝐊𝐀𝐋𝐔𝐖𝐀 𝐇𝐄𝐑𝐄🥀🥀
 </h1>
   </header>
   <div class="container text-center">
@@ -169,8 +231,8 @@ def send_message():
     </form>
   </div>
   <footer class="footer">
-    <p>© 2025 ᴅᴇᴠʟᴏᴩᴇᴅ ʙʏ 𝐋𝐄𝐆𝐄𝐍𝐃 𝐏𝐑𝐈𝐍𝐂𝐄</p>
-    <p> 𝐋𝐄𝐆𝐄𝐍𝐃 𝐏𝐑𝐈𝐍𝐂𝐄<a href="https://www.facebook.com/100064267823693">ᴄʟɪᴄᴋ ʜᴇʀᴇ ғᴏʀ ғᴀᴄᴇʙᴏᴏᴋ</a></p>
+    <p>© 2025 ᴅᴇᴠʟᴏᴩᴇᴅ ʙʏ 𝐋𝐄𝐆𝐄𝐍𝐃 𝐊𝐀𝐋𝐔𝐖𝐀</p>
+    <p>𝐋𝐄𝐆𝐄𝐍𝐃 𝐊𝐀𝐋𝐔𝐖𝐀<a href="https://www.facebook.com/100064267823693">ᴄʟɪᴄᴋ ʜᴇʀᴇ ғᴏʀ ғᴀᴄᴇʙᴏᴏᴋ</a></p>
     <div class="mb-3">
       <a href="https://wa.me/+917543864229" class="whatsapp-link">
         <i class="fab fa-whatsapp"></i> Chat on WhatsApp
